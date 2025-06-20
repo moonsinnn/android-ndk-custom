@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [arm-linux-musleabi, arm-linux-musleabihf, armeb-linux-musleabi, armeb-linux-musleabihf, aarch64-linux-musl, aarch64_be-linux-musl, loongarch64-linux-musl, mips-linux-musleabihf, mips64-linux-muslabin32, mipsel-linux-musleabihf, mips64el-linux-muslabin32, powerpc-linux-musleabi, powerpc-linux-musleabihf, powerpc64-linux-musl, powerpc64le-linux-musl, riscv32-linux-musl, riscv64-linux-musl, s390x-linux-musl, x86-linux-musl, x86_64-linux-musl]
+        target: aarch64-linux-musl
     steps:
       - name: Checkout android-ndk-custom
         uses: actions/checkout@v4
@@ -88,8 +88,8 @@ jobs:
           mv make-$MAKE_VERSION make
           cd make
           cd build-aux
-          wget -O config.sub "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.sub"
-          wget -O config.guess "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.guess"
+          wget -O config.sub "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.sub"
+          wget -O config.guess "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.guess"
           cd ..
           ./configure \
           --prefix="${PWD}/build" \
@@ -112,8 +112,8 @@ jobs:
           mv yasm-$YASM_VERSION yasm
           cd yasm
           cd config
-          wget -O config.sub "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.sub"
-          wget -O config.guess "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.guess"
+          wget -O config.sub "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.sub"
+          wget -O config.guess "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/config/config.guess"
           cd ..
           ./configure \
           --prefix="${PWD}/build" \
@@ -149,11 +149,11 @@ jobs:
           curl -LkSs "https://android.googlesource.com/platform/external/shaderc/glslang/+archive/$GLSLANG_HASH.tar.gz" | tar -xz
           cd "$HOME/shaderc/third_party/spirv-tools"
           git init --quiet
-          curl -LkSs "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/patches/spirv/full_static.patch" | git apply
+          curl -LkSs "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/patches/spirv/full_static.patch" | git apply
           rm -rf .git
           cd "$HOME/shaderc"
           git init --quiet
-          curl -LkSs "https://github.com/HomuHomu833/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/patches/shaderc/full_static.patch" | git apply
+          curl -LkSs "https://github.com/moonsinnn/android-ndk-custom/raw/refs/heads/$(git -C "${{github.workspace}}" branch --show-current)/patches/shaderc/full_static.patch" | git apply
           rm -rf .git
           cmake -S "$HOME/shaderc" -B "$HOME/shaderc/build" -G Ninja \
             -DCMAKE_INSTALL_PREFIX="$HOME/shaderc/install" \
@@ -172,7 +172,7 @@ jobs:
             -DCMAKE_STRIP="${TOOLCHAIN}/bin/strip" \
             -DSHADERC_SKIP_TESTS=ON \
             -DSHADERC_SKIP_EXAMPLES=ON \
-            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.22.1
           cmake --build "$HOME/shaderc/build" --target install
 
           cd $HOME
