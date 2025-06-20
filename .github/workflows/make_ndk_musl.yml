@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: aarch64-linux-musl
+        target: [arm-linux-musleabihf,aarch64-linux-musl]
     steps:
       - name: Checkout android-ndk-custom
         uses: actions/checkout@v4
