@@ -5,12 +5,12 @@ on:
     inputs:
       version:
         description: "NDK Release version:"
-        default: "29-beta2"
+        default: "29-beta1"
         required: true
       projects:
         description: "Projects to build:"
         # bolt;clang;clang-tools-extra;compiler-rt;cross-project-tests;libc;libclc;lld;lldb;mlir;openmp;polly;pstl;flang
-        default: "bolt;clang;clang-tools-extra;lld"
+        default: "bolt;clang;clang-tools-extra;lld;libc"
         required: true
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [arm-linux-musleabi, arm-linux-musleabihf, armeb-linux-musleabi, armeb-linux-musleabihf, aarch64-linux-musl, aarch64_be-linux-musl, loongarch64-linux-musl, mips-linux-musleabihf, mips64-linux-muslabin32, mipsel-linux-musleabihf, mips64el-linux-muslabin32, powerpc-linux-musleabi, powerpc-linux-musleabihf, powerpc64-linux-musl, powerpc64le-linux-musl, riscv32-linux-musl, riscv64-linux-musl, s390x-linux-musl, x86-linux-musl, x86_64-linux-musl]
+        target: [arm-linux-musleabi, aarch64-linux-musl]
     runs-on: ubuntu-24.04
     env:
       ROOTDIR: ${{github.workspace}}
@@ -127,8 +127,8 @@ jobs:
           TOOLCHAIN=${PWD}/zig-as-llvm
           export CC=${TOOLCHAIN}/bin/cc
           export CXX=${TOOLCHAIN}/bin/c++
-          export CFLAGS="-fstack-protector-strong -fsanitize=undefined"
-          export CXXFLAGS="-fstack-protector-strong -fsanitize=undefined"
+          export CFLAGS="-O3 -fstack-clash-protection -fstack-protector-strong -fsanitize=undefined -Wno-unused-command-line-argument"
+          export CXXFLAGS="-O3 -fstack-clash-protection -fstack-protector-strong -fsanitize=undefined -Wno-unused-command-line-argument"
           export LD=${TOOLCHAIN}/bin/ld
           export OBJCOPY=${TOOLCHAIN}/bin/objcopy
           export AR=${TOOLCHAIN}/bin/ar
@@ -209,8 +209,8 @@ jobs:
           cmake -S "$ROOTDIR/llvm" -B "${TARGET_BUILD_DIR}" -G Ninja \
             -DCMAKE_INSTALL_PREFIX="${ROOTDIR}/llvm-${{matrix.target}}" \
             -DCMAKE_PREFIX_PATH="${TARGET_INSTALL_DIR}" \
-            -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM;RISCV" \
-            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DLLVM_TARGETS_TO_BUILD="AArch64;ARM;BPF;RISCV;WebAssembly;X86" \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CROSSCOMPILING=True \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{matrix.target}} \
@@ -221,9 +221,9 @@ jobs:
             -DCMAKE_OBJCOPY="${TOOLCHAIN}/bin/objcopy" \
             -DCMAKE_AR="${TOOLCHAIN}/bin/ar" \
             -DCMAKE_STRIP="${TOOLCHAIN}/bin/strip" \
-            -DCMAKE_C_FLAGS="-fstack-protector-strong -fsanitize=undefined -static" \
-            -DCMAKE_CXX_FLAGS="-fstack-protector-strong -fsanitize=undefined -static" \
-            -DCMAKE_EXE_LINKER_FLAGS="-static" \
+            -DCMAKE_C_FLAGS="-O2 -fstack-clash-protection -fstack-protector-strong -fsanitize=undefined -g0 -static-pie -Wno-unused-command-line-argument" \
+            -DCMAKE_CXX_FLAGS="-O2 -fstack-clash-protection -fstack-protector-strong -fsanitize=undefined -g0 -static-pie -Wno-unused-command-line-argument" \
+            -DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,relro,-z,now -s -static-pie" \
             -DLLVM_ENABLE_PROJECTS="${{inputs.projects}}" \
             -DLLVM_ENABLE_ZLIB=FORCE_ON \
             -DLLVM_ENABLE_ZSTD=FORCE_ON \
